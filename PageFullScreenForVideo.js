@@ -1,0 +1,77 @@
+// ==UserScript==
+// @name         FullPageVideo
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  这是一个新的Tampermonkey脚本
+// @author       Yolo
+// @match        https://mjv004.com/*
+// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function () {
+    'use strict';
+    // 在这里写入你的代码...
+    const isIframe = window.top !== window.self;
+    const fullscreenStyle = `
+        .reset-style {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
+
+        .keep-front {
+            z-index: 99999 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+        }
+
+        .no-scroll {
+            overflow: hidden !important;
+        }
+    `
+
+    GM_addStyle(fullscreenStyle)
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (!isIframe) {
+                const targetElement = document.querySelector("iframe");
+                toggleFullScreen(targetElement);
+
+                const innerPlayer = targetElement.contentDocument.querySelector("#player_top .plyr");
+                toggleFullScreen(innerPlayer);
+                toggleDisableScroll(document);
+            }
+            else {
+                const targetElement = document.querySelector("#player_top .plyr");
+                toggleFullScreen(targetElement);
+
+                const outerElement = window.parent.document.querySelector("iframe");
+                toggleFullScreen(outerElement);
+                toggleDisableScroll(window.parent.document);
+            }
+        }
+    });
+
+    function toggleClassRecursively(element, className) {
+        element.classList.toggle(className);
+
+        if (element.parentElement && element.parentElement.tagName !== "BODY") {
+            toggleClassRecursively(element.parentElement, className);
+        }
+    }
+
+    function toggleFullScreen(element) {
+        toggleClassRecursively(element, "reset-style");
+        toggleClassRecursively(element, "keep-front");
+    }
+
+    function toggleDisableScroll(targetDocument) {
+        targetDocument.documentElement.classList.toggle("no-scroll");
+        targetDocument.body.classList.toggle("no-scroll");
+    }
+})();
