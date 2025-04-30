@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name         theaterMode
-// @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  Video theater mode for some sites
-// @description:zh-CN  一些网站的视频剧院模式
-// @description:zh-TW  一些網站的視頻劇院模式
-// @author       Yolo
-// @match        https://mjv004.com/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
-// @grant        GM_addStyle
+// @name                theaterMode
+// @namespace           http://tampermonkey.net/
+// @version             0.1
+// @description         Video theater mode for some sites
+// @description:zh-CN   一些网站的视频剧院模式
+// @description:zh-TW   一些網站的視頻劇院模式
+// @author              Yolo
+// @match               https://mjv004.com/*
+// @icon                data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @grant               GM_addStyle
 // ==/UserScript==
 
 (function () {
