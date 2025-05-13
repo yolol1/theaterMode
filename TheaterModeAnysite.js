@@ -5,16 +5,20 @@
 // @description         Video theater mode for some sites
 // @description:zh-CN   一些网站的视频剧院模式
 // @description:zh-TW   一些網站的視頻劇院模式
+// @tag                 utilities
 // @author              Yolo
 // @match               https://mjv004.com/*
 // @match               https://missav.ai/*
 // @icon                data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant               GM_addStyle
+// @grant               GM_getValue
+// @grant               GM_setValue
 // ==/UserScript==
 
 (function () {
     'use strict';
     // 在这里写入你的代码...
+    const playerDict = loadPlayerDict();
     const isIframe = window.top !== window.self;
     const fullscreenStyle = `
         .reset-style {
@@ -61,10 +65,6 @@
     // });
 
     // missav
-    const playerDict = {
-        "mjv004.com": ".plyr",
-        "missav.ai": ".plyr"
-    };
     const playerSelector = playerDict[window.location.hostname];
     const playerElement = document.querySelector(playerSelector);
     document.addEventListener("keydown", (e) => {
@@ -78,6 +78,19 @@
             }
         }
     });
+
+    async function savePlayerDict(playerDict) {
+        await GM_setValue("playerDict", JSON.stringify(playerDict));
+    }
+
+    async function loadPlayerDict() {
+        const defaultPlayerDict = {
+            "mjv004.com": ".plyr",
+            "missav.ai": ".plyr"
+        };
+        const playerDict = await GM_getValue("playerDict");
+        return JSON.parse(playerDict) || defaultPlayerDict;
+    }
 
     function toggleTheaterMode(targetElement) {
         targetElement.classList.toggle("reset-style");
