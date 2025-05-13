@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name                theaterMode
 // @namespace           http://tampermonkey.net/
-// @version             0.1
+// @version             0.0.1
 // @description         Video theater mode for some sites
 // @description:zh-CN   一些网站的视频剧院模式
 // @description:zh-TW   一些網站的視頻劇院模式
 // @author              Yolo
 // @match               https://mjv004.com/*
+// @match               https://missav.ai/*
 // @icon                data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant               GM_addStyle
 // ==/UserScript==
@@ -38,22 +39,42 @@
     `
 
     GM_addStyle(fullscreenStyle)
+    // document.addEventListener("keydown", (e) => {
+    //     if (e.key === "Escape") {
+    //         if (!isIframe) {
+    //             const targetElement = document.querySelector("iframe");
+    //             toggleFullScreen(targetElement);
+
+    //             const innerPlayer = targetElement.contentDocument.querySelector("#player_top .plyr");
+    //             toggleFullScreen(innerPlayer);
+    //             toggleDisableScroll(document);
+    //         }
+    //         else {
+    //             const targetElement = document.querySelector("#player_top .plyr");
+    //             toggleFullScreen(targetElement);
+
+    //             const outerElement = window.parent.document.querySelector("iframe");
+    //             toggleFullScreen(outerElement);
+    //             toggleDisableScroll(window.parent.document);
+    //         }
+    //     }
+    // });
+
+    // missav
+    const playerDict = {
+        "mjv004.com": "#player_top .plyr",
+        "missav.ai": "#player_top .plyr"
+    };
+    const playerSelector = playerDict[window.location.hostname];
+    const playerElement = document.querySelector(playerSelector);
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             if (!isIframe) {
-                const targetElement = document.querySelector("iframe");
-                toggleFullScreen(targetElement);
-
-                const innerPlayer = targetElement.contentDocument.querySelector("#player_top .plyr");
-                toggleFullScreen(innerPlayer);
-                toggleDisableScroll(document);
+                playerElement.classList.toggle("reset-style");
+                playerElement.classList.toggle("keep-front");
             }
             else {
-                const targetElement = document.querySelector("#player_top .plyr");
-                toggleFullScreen(targetElement);
-
-                const outerElement = window.parent.document.querySelector("iframe");
-                toggleFullScreen(outerElement);
+                toggleFullScreen(playerElement);
                 toggleDisableScroll(window.parent.document);
             }
         }
