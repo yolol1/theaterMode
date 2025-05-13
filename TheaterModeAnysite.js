@@ -1,5 +1,7 @@
 // ==UserScript==
-// @name                theaterMode
+// @name                Therter Mode Any Site
+// @name：zh-CN         剧院模式任意网站
+// @name：zh-TW         劇院模式任意網站
 // @namespace           http://tampermonkey.net/
 // @version             0.0.1
 // @description         Video theater mode for some sites
@@ -9,6 +11,7 @@
 // @author              Yolo
 // @match               https://mjv004.com/*
 // @match               https://missav.ai/*
+// @match               https://jable.tv/*
 // @icon                data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant               GM_addStyle
 // @grant               GM_getValue
@@ -19,6 +22,8 @@
     'use strict';
     // 在这里写入你的代码...
     const playerDict = loadPlayerDict();
+    console.log(playerDict);
+
     const isIframe = window.top !== window.self;
     const fullscreenStyle = `
         .reset-style {
@@ -29,7 +34,7 @@
         }
 
         .keep-front {
-            z-index: 99999 !important;
+            z-index: 2147483647 !important;
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
@@ -66,7 +71,9 @@
 
     // missav
     const playerSelector = playerDict[window.location.hostname];
+
     const playerElement = document.querySelector(playerSelector);
+
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             if (!isIframe) {
@@ -79,17 +86,18 @@
         }
     });
 
-    async function savePlayerDict(playerDict) {
-        await GM_setValue("playerDict", JSON.stringify(playerDict));
+    function savePlayerDict(playerDict) {
+        GM_setValue("playerDict", JSON.stringify(playerDict));
     }
 
-    async function loadPlayerDict() {
+    function loadPlayerDict() {
         const defaultPlayerDict = {
             "mjv004.com": ".plyr",
-            "missav.ai": ".plyr"
+            "missav.ai": ".plyr",
+            "jable.tv": ".plyr"
         };
-        const playerDict = await GM_getValue("playerDict");
-        return JSON.parse(playerDict) || defaultPlayerDict;
+        const playerDict = GM_getValue("playerDict",);
+        return playerDict || defaultPlayerDict;
     }
 
     function toggleTheaterMode(targetElement) {
