@@ -62,16 +62,15 @@
 
     // missav
     const playerDict = {
-        "mjv004.com": "#player_top .plyr",
-        "missav.ai": "#player_top .plyr"
+        "mjv004.com": ".plyr",
+        "missav.ai": ".plyr"
     };
     const playerSelector = playerDict[window.location.hostname];
     const playerElement = document.querySelector(playerSelector);
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             if (!isIframe) {
-                playerElement.classList.toggle("reset-style");
-                playerElement.classList.toggle("keep-front");
+                toggleTheaterMode(playerElement);
             }
             else {
                 toggleFullScreen(playerElement);
@@ -79,6 +78,11 @@
             }
         }
     });
+
+    function toggleTheaterMode(targetElement) {
+        targetElement.classList.toggle("reset-style");
+        targetElement.classList.toggle("keep-front");
+    }
 
     function toggleClassRecursively(element, className) {
         element.classList.toggle(className);
