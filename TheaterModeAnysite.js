@@ -69,6 +69,20 @@
             }
         })
     }
+    const playerSelectorList = [
+        ".plyr",
+        ".jwplayer",
+        "#vplayer",
+    ]
+    function findPlayerElement(playerSelectorList) {
+        for (const selector of playerSelectorList) {
+            const playerElement = document.querySelector(selector);
+            if (playerElement) {
+                return playerElement;
+            }
+        }
+        return null;
+    }
 
     function runInTopLevel() {
         const playerDict = loadPlayerDict();
@@ -89,7 +103,7 @@
 
         document.addEventListener("keydown", (e) => {
             const iframeElement = document.querySelector("iframe");
-            const playerElement = document.querySelector(playerDict[window.location.hostname]);
+            const playerElement = findPlayerElement(playerSelectorList);
             const theaterElement = playerElement || iframeElement;
             if (e.key === "Escape") {
                 toggleTheaterMode(theaterElement);
