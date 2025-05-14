@@ -45,29 +45,79 @@
 
     let isIframeMode = window.top !== window.self;
     function runInIframe() {
-        console.log("running in iframe");
-
-        // tell top to listen message
-        window.parent.postMessage("IframeMode", "*");
+        window.parent.postMessage({
+            type: "IframeMode"
+        }, "*");
         // listen to message from top
         window.addEventListener("message", (event) => {
-            switch (event.data) {
+            if (!event.data.type) return;
+            switch (event.data.type) {
                 case "toggleTheaterMode":
                     const playerElement = findPlayerElement(playerSelectorList);
                     toggleTheaterMode(playerElement);
+                    break;
+                case "check-player":
+                    const hasPlayer = !!findPlayerElement(playerSelectorList);
+                    event.source.postMessage({
+                        type: "player-check-response",
+                        hasPlayer: hasPlayer
+                    }, "*");
                     break;
                 default:
                     break;
             }
         });
 
-        document.addEventListener("keydown", (e) => {
+        window.addEventListener("keydown", (e) => {
             console.log("recieved keydown event in iframe");
             if (e.key === "Escape") {
-                window.parent.postMessage("toggleTheaterMode", "*");
+                window.parent.postMessage({
+                    type: "toggleTheaterMode"
+                }, "*");
             }
         })
     }
+    function runInTopLevel() {
+        let theaterSelector;
+        let toggleTarget;
+        window.addEventListener("message", async (event) => {
+            if (!toggleTarget) {
+                const iframeElement = await findIframeContainingPlayer();
+                const playerElement = findPlayerElement(playerSelectorList);
+                const theaterElement = playerElement || iframeElement;
+                toggleTarget = theaterElement;
+            }
+            switch (event.data.type) {
+                case "IframeMode":
+                    isIframeMode = event.data.isIframeMode;
+                    theaterSelector = "iframe";
+                    break;
+                case "toggleTheaterMode":
+                    console.log("recieved toggleTheaterMode event in top");
+                    console.log(event);
+
+
+                    toggleTheaterMode(toggleTarget);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        document.addEventListener("keydown", async (e) => {
+            const iframeElement = await findIframeContainingPlayer();
+            const playerElement = findPlayerElement(playerSelectorList);
+            const theaterElement = playerElement || iframeElement;
+            toggleTarget = theaterElement;
+            if (e.key === "Escape") {
+                toggleTheaterMode(theaterElement);
+                iframeElement && iframeElement.contentWindow.postMessage({
+                    type: "toggleTheaterMode"
+                }, "*");
+            }
+        });
+    }
+
     const playerSelectorList = [
         ".plyr",
         ".jwplayer",
@@ -83,33 +133,54 @@
         return null;
     }
 
-    function runInTopLevel() {
+    // 1. 修改成 async 函数，返回 Promise
+    async function findIframeContainingPlayer() {
+        const iframes = Array.from(document.querySelectorAll("iframe"));
+        const targetOrigin = '*';  // 可改成具体域名以增强安全
+        const total = iframes.length;
+        let settled = false;
+        let responded = 0;
 
-        let theaterSelector;
-        window.addEventListener("message", (event) => {
-            switch (event.data) {
-                case "IframeMode":
-                    isIframeMode = event.data.isIframeMode;
-                    theaterSelector = "iframe";
-                    break;
-                case "toggleTheaterMode":
-                    toggleTheaterMode(document.querySelector(theaterSelector));
-                    break;
-                default:
-                    break;
+        return new Promise(resolve => {
+            function receiveCheckPlayerResult(event) {
+                // ① 可加安全校验：event.origin === 你的父页面 origin
+                // 注意：这里 event.origin !== '*' 的检查没意义，'*' 只能用于 postMessage 的第二参
+                // if (event.origin !== expectedOrigin) return;
+
+                const idx = iframes.findIndex(f => f.contentWindow === event.source);
+                if (idx < 0) return;           // 不是我们发的消息
+                if (event.data?.type !== "player-check-response") return;
+
+                responded++;
+                const hasPlayer = !!event.data.hasPlayer;
+
+                // ② 早退：一旦某 iframe 有 player，就立刻 resolve
+                if (hasPlayer && !settled) {
+                    settled = true;
+                    window.removeEventListener("message", receiveCheckPlayerResult);
+                    return resolve(iframes[idx]);
+                }
+
+                // ③ 全部回复且都没找到
+                if (responded === total && !settled) {
+                    settled = true;
+                    window.removeEventListener("message", receiveCheckPlayerResult);
+                    return resolve(null);
+                }
             }
-        });
 
-        document.addEventListener("keydown", (e) => {
-            const iframeElement = document.querySelector("iframe");
-            const playerElement = findPlayerElement(playerSelectorList);
-            const theaterElement = playerElement || iframeElement;
-            if (e.key === "Escape") {
-                toggleTheaterMode(theaterElement);
-                iframeElement && iframeElement.contentWindow.postMessage("toggleTheaterMode", "*");
+            window.addEventListener("message", receiveCheckPlayerResult);
+
+            // ④ 同步发消息出去
+            for (const iframe of iframes) {
+                iframe.contentWindow.postMessage({ type: "check-player" }, targetOrigin);
             }
         });
     }
+
+
+
+
 
     if (isIframeMode) {
         runInIframe();
