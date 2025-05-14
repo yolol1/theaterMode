@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                Therter Mode Any Site
-// @name：zh-CN         剧院模式任意网站
-// @name：zh-TW         劇院模式任意網站
+// @name:zh-CN          剧院模式任意网站
+// @name:zh-TW          劇院模式任意網站
 // @namespace           http://tampermonkey.net/
 // @version             0.0.1
 // @description         Video theater mode for some sites
