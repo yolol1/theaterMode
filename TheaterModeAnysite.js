@@ -53,8 +53,7 @@
         window.addEventListener("message", (event) => {
             switch (event.data) {
                 case "toggleTheaterMode":
-                    const playerDict = loadPlayerDict();
-                    const playerElement = document.querySelector(playerDict[window.location.hostname]);
+                    const playerElement = findPlayerElement(playerSelectorList);
                     toggleTheaterMode(playerElement);
                     break;
                 default:
@@ -85,7 +84,7 @@
     }
 
     function runInTopLevel() {
-        const playerDict = loadPlayerDict();
+
         let theaterSelector;
         window.addEventListener("message", (event) => {
             switch (event.data) {
@@ -117,17 +116,6 @@
     }
     else {
         runInTopLevel();
-    }
-
-    function loadPlayerDict() {
-        const defaultPlayerDict = {
-            "mjv004.com": ".plyr",
-            "missav.ai": ".plyr",
-            "jable.tv": ".plyr",
-            "www.javrate.com": ".plyr"
-        };
-        const playerDict = GM_getValue("playerDict",);
-        return playerDict || defaultPlayerDict;
     }
 
     function toggleClassRecursively(element, className) {
