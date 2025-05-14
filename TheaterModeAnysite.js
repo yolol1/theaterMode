@@ -10,7 +10,7 @@
 // @tag                 utilities
 // @author              Yolo
 // @match               *://**/*
-// @icon                data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @icon                https://api.iconify.design/mdi:movie-open-play-outline.svg
 // @grant               GM_addStyle
 // @grant               GM_getValue
 // @grant               GM_setValue
